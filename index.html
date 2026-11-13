@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGRI-SOIGNE - Docteur des Plantes</title>
+<style>
+body{font-family:Arial;background:#e8f5e9;margin:0;padding:10px}
+.header{background:#2e7d32;color:white;padding:15px;text-align:center;border-radius:12px}
+.header h1{margin:0;font-size:22px}
+.header p{margin:5px 0 0;font-size:13px}
+#chat{background:white;height:420px;overflow-y:auto;padding:12px;border-radius:12px;margin-top:10px;border:1px solid #c8e6c9}
+.msg{padding:10px;border-radius:10px;margin:8px 0;max-width:85%;font-size:14px;line-height:1.5}
+.bot{background:#e8f5e9}
+.user{background:#c8e6c9;margin-left:auto;text-align:right}
+.input-box{display:flex;gap:8px;margin-top:10px}
+input{flex:1;padding:12px;border-radius:20px;border:1px solid #aaa;font-size:15px}
+button{background:#2e7d32;color:white;border:none;padding:12px 18px;border-radius:20px;font-size:15px}
+.plantes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.plantes button{background:white;color:#2e7d32;border:1px solid #2e7d32;padding:6px 10px;font-size:12px;border-radius:20px}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>🌱 AGRI-SOIGNE</h1>
+<p>Le docteur gratuit de tes plantes - 20 plantes du Bénin</p>
+<p>Par un jeune entrepreneur de Cotonou</p>
+</div>
+
+<div class="plantes" id="plantes"></div>
+<div id="chat"></div>
+<div class="input-box">
+<input id="input" placeholder="Ex: ma tomate a des taches noires...">
+<button onclick="envoyer()">Envoyer ➤</button>
+</div>
+
+<script>
+const plantes = {
+"tomate":"🍅 TOMATE - Maladies: Mildiou (taches noires), Taches noires, Chenilles. REMÈDE: Enlève les feuilles malades, ne mouille pas les feuilles, pulvérise purin de neem (feuilles de neem + eau + savon) 2 fois par semaine. Ne plante pas tomate après tomate.",
+"gombo":"🌿 GOMBO - Maladies: Mosaïque (feuilles jaunes frisées), Pucerons, Chenilles. REMÈDE: Arrache les pieds très malades, pulvérise eau + savon + piment pilé. Mets du cendre de bois au pied.",
+"mais":"🌽 MAÏS - Maladies: Chenille légionnaire (trous dans feuilles), Charbon, Rouille. REMÈDE: Mets du sable + cendre dans le cœur du maïs le matin, écrase les chenilles à la main, pulvérise neem.",
+"manioc":"🥔 MANIOC - Maladies: Mosaïque (feuilles déformées), Cochenilles, Pourriture racines. REMÈDE: Utilise boutures saines, ne replante pas les pieds malades, mets cendre autour, arrache et brûle les pieds très malades.",
+"piment":"🌶️ PIMENT - Maladies: Mosaïque, Pucerons, Flétrissement. REMÈDE: Pulvérise neem + savon, enlève les pieds flétris, ne pas trop arroser.",
+"aubergine":"🍆 AUBERGINE - Maladies: Chenilles, Pucerons, Flétrissement bactérien. REMÈDE: Ramasse les chenilles, pulvérise neem, mets paillage pour garder sol humide.",
+"chou":"🥬 CHOU - Maladies: Chenilles vertes, Pourriture, Pucerons. REMÈDE: Cherche les chenilles sous feuilles chaque matin, pulvérise neem + savon, mets cendre.",
+"carotte":"🥕 CAROTTE - Maladies: Mouche de la carotte, Fonte des semis, Alternaria. REMÈDE: Ne mets pas fumier frais, éclaircis les plants, mets cendre, arrose peu.",
+"oignon":"🧅 OIGNON - Maladies: Mildiou (feuilles jaunes), Thrips (petits insectes), Pourriture. REMÈDE: Ne mouille pas feuilles, espace bien les plants, pulvérise décoction d'ail.",
+"haricot":"🫘 HARICOT - Maladies: Anthracnose (taches noires), Pucerons, Rouille. REMÈDE: Ne touche pas plants mouillés, pulvérise neem, arrache pieds très malades.",
+"arachide":"🥜 ARACHIDE - Maladies: Rosette (rabougrissement), Rouille, Pourriture. REMÈDE: Sème tôt, arrache pieds rosette, mets cendre, rotation: ne pas semer arachide après arachide.",
+"coton":"☁️ COTON - Maladies: Chenilles (ver rose), Pucerons, Bactériose. REMÈDE: Surveille chaque 2 jours, ramasse chenilles, pulvérise neem fort, brûle restes de récolte.",
+"igname":"🍠 IGNAME - Maladies: Pourriture tubercules, Nématodes, Anthracnose. REMÈDE: Choisis tubercules sains sans blessures, mets cendre dans trou de plantation, rotation 3 ans.",
+"patate":"🍠 PATATE DOUCE - Maladies: Charançons (vers dans tubercule), Mosaïque. REMÈDE: Ne laisse pas tubercules en terre trop longtemps, mets cendre, utilise boutures saines.",
+"banane":"🍌 BANANE PLANTAIN - Maladies: Cercosporiose (feuilles jaunes/noires), Charançon, Nématodes. REMÈDE: Coupe feuilles très malades et brûle, mets paillage, ne plante pas trop serré.",
+"papaye":"🍈 PAPAYE - Maladies: Mosaïque, Cochenilles, Anthracnose fruits. REMÈDE: Arrache pieds mosaïque, pulvérise eau savonneuse sur cochenilles, enlève fruits pourris.",
+"mangue":"🥭 MANGUE - Maladies: Mouche des fruits, Anthracnose (taches noires fruits), Oïdium. REMÈDE: Ramasse fruits tombés et enterre, mets pièges à mouches, pulvérise neem avant floraison.",
+"riz":"🍚 RIZ - Maladies: Pyriculariose (taches sur feuilles), Helminthosporiose. REMÈDE: Ne mets pas trop d'urée, espace plants, vide eau 2 jours si maladie forte, utilise semences saines.",
+"soja":"🌱 SOJA - Maladies: Rouille, Mosaïque, Chenilles. REMÈDE: Sème tôt, pulvérise neem, arrache pieds mosaïque.",
+"ananas":"🍍 ANANAS - Maladies: Cochenille, Pourriture cœur, Nématodes. REMÈDE: Enlève cochenilles avec eau savonneuse, ne laisse pas eau stagner au cœur, mets cendre."
+};
+
+let chat = document.getElementById('chat');
+function addMsg(txt, type){
+  let d=document.createElement('div');
+  d.className='msg '+type; d.innerHTML=txt;
+  chat.appendChild(d); chat.scrollTop=chat.scrollHeight;
+}
+addMsg("Bonjour mon ami paysan! 👋 Je suis AGRI-SOIGNE. Écris-moi le nom de ta plante + ce que tu vois. Ex: <b>'ma tomate a des taches noires'</b> ou clique sur une plante en haut.", "bot");
+
+let cont = document.getElementById('plantes');
+Object.keys(plantes).forEach(k=>{
+  let b=document.createElement('button');
+  b.textContent=k; b.onclick=()=>{ addMsg(k, "user"); addMsg(plantes[k], "bot"); };
+  cont.appendChild(b);
+});
+
+function envoyer(){
+  let inp=document.getElementById('input');
+  let q=inp.value.toLowerCase(); if(!q) return;
+  addMsg(inp.value, "user"); inp.value="";
+  for(let k in plantes){
+    if(q.includes(k)){ addMsg(plantes[k], "bot"); return; }
+  }
+  if(q.includes('tache')||q.includes('noir')) addMsg("Ça ressemble à une maladie de taches (mildiou / anthracnose). Enlève les feuilles malades, ne mouille pas les feuilles, pulvérise neem + savon 2 fois par semaine. Quelle est ta plante? Dis-moi: tomate, maïs, manioc...", "bot");
+  else if(q.includes('jaune')) addMsg("Feuilles jaunes = souvent manque d'eau, trop d'eau, ou mosaïque. Vérifie si sol est sec ou trop mouillé. Si feuilles frisées + jaunes, c'est mosaïque: arrache le pied malade. C'est quelle plante?", "bot");
+  else if(q.includes('chenille')||q.includes('trou')||q.includes('mange')) addMsg("Chenilles! Ramasse-les à la main le matin, mets cendre + sable dans le cœur de la plante, pulvérise neem. C'est quelle plante? Maïs, chou, coton?", "bot");
+  else if(q.includes('puceron')||q.includes('petit insecte')) addMsg("Pucerons: pulvérise eau + savon + piment pilé. Fais-le le soir. C'est sur quelle plante?", "bot");
+  else if(q.includes('fletri')||q.includes('fan')) addMsg("Flétrissement: ne pas trop arroser, vérifie si racines pourries. Arrache pied très malade pour ne pas contaminer les autres. C'est quelle plante?", "bot");
+  else addMsg("Je n'ai pas bien compris. Écris comme ça: <b>'ma [plante] a [ce que tu vois]'</b>. Ex: 'mon maïs a des chenilles'. Ou clique sur une plante en haut 👆", "bot");
+}
+document.getElementById('input').addEventListener('keypress', e=>{ if(e.key==='Enter') envoyer(); });
+</script>
+</body>
+</html>
